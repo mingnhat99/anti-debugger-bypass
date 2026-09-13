@@ -32,7 +32,19 @@ Whether you're a security researcher, a penetration tester, or just trying to in
 
 ## 🚀 Installation
 
-Since this extension is not currently on the Chrome Web Store, you can easily install it manually (Unpacked Extension):
+Since this extension is not currently on the Chrome Web Store, you can install it manually in one of the following ways:
+
+### Option 1: Download the prebuilt `.crx` (easiest)
+
+1. Download [`dist/anti-debugger-bypass.crx`](dist/anti-debugger-bypass.crx) from this repository.
+2. Open Google Chrome and navigate to `chrome://extensions/`.
+3. Enable **Developer mode** using the toggle switch in the top right corner.
+4. Drag and drop the downloaded `.crx` file onto the page.
+5. The extension is now installed and active! 🎉
+
+> **Note:** Chrome sometimes blocks extensions installed outside the Web Store. If the drag & drop is rejected, download [`dist/anti-debugger-bypass.zip`](dist/anti-debugger-bypass.zip), unzip it, and follow Option 2 below with the unzipped folder.
+
+### Option 2: Load unpacked
 
 1. **Clone or Download the repository:**
    ```bash
@@ -43,6 +55,16 @@ Since this extension is not currently on the Chrome Web Store, you can easily in
 4. Click on the **Load unpacked** button in the top left.
 5. Select the `anti-debugger` directory you just cloned/downloaded.
 6. The extension is now installed and active! 🎉
+
+### Building the `.crx` yourself
+
+```bash
+make        # builds dist/anti-debugger-bypass.crx (signed, requires Chrome)
+make zip    # builds dist/anti-debugger-bypass.zip
+make clean  # removes build artifacts
+```
+
+On the first run a private signing key (`extension.pem`) is generated automatically and reused afterwards, so the extension ID stays the same across builds. Keep this key private — it is git-ignored and must never be committed or lost.
 
 ## 💻 Usage
 

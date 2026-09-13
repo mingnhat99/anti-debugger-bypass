@@ -1,0 +1,8 @@
+# macOS
+.DS_Store
+
+# Build staging directory
+build/
+
+# Private signing key for the .crx - NEVER commit this
+*.pem
