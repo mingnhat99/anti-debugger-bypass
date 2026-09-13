@@ -3,9 +3,9 @@
 # <img src="icon.svg" width="36" height="36" align="top" alt="Icon"> Anti-Debugger Bypass
 
 [![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-4285F4?logo=googlechrome&logoColor=white)](https://google.com/chrome)
-[![GitHub stars](https://img.shields.io/github/stars/mingnhat99/anti-debugger?style=social)](https://github.com/mingnhat99/anti-debugger/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/mingnhat99/anti-debugger?style=social)](https://github.com/mingnhat99/anti-debugger/network/members)
-[![GitHub issues](https://img.shields.io/github/issues/mingnhat99/anti-debugger)](https://github.com/mingnhat99/anti-debugger/issues)
+[![GitHub stars](https://img.shields.io/github/stars/mingnhat99/anti-debugger-bypass?style=social)](https://github.com/mingnhat99/anti-debugger-bypass/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/mingnhat99/anti-debugger-bypass?style=social)](https://github.com/mingnhat99/anti-debugger-bypass/network/members)
+[![GitHub issues](https://img.shields.io/github/issues/mingnhat99/anti-debugger-bypass)](https://github.com/mingnhat99/anti-debugger-bypass/issues)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 *A powerful Chrome extension to bypass common anti-debugging scripts and DevTools traps.*
@@ -49,12 +49,12 @@ Since this extension is not currently on the Chrome Web Store, you can install i
 
 1. **Clone or Download the repository:**
    ```bash
-   git clone https://github.com/mingnhat99/anti-debugger.git
+   git clone https://github.com/mingnhat99/anti-debugger-bypass.git
    ```
 2. Open Google Chrome and navigate to `chrome://extensions/`.
 3. Enable **Developer mode** using the toggle switch in the top right corner.
 4. Click on the **Load unpacked** button in the top left.
-5. Select the `anti-debugger` directory you just cloned/downloaded.
+5. Select the `anti-debugger-bypass` directory you just cloned/downloaded.
 6. The extension is now installed and active! 🎉
 
 ### Building the `.crx` yourself
