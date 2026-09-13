@@ -1,16 +1,14 @@
 name: Release
 
 # When a push to main changes the version in manifest.json, build the
-# .crx/.zip, create a GitHub release tagged v<version_name> with the
-# artifacts attached, and commit the refreshed dist/ artifacts back to
-# the branch. The release tag and file names use "version_name"
-# (free-form, e.g. "1.1-rc1"), falling back to "version" when not set.
+# .crx/.zip and attach them to a new GitHub release tagged v<version_name>.
+# The release tag and file names use "version_name" (free-form, e.g.
+# "1.1-rc1"), falling back to "version" when not set.
 
 on:
   push:
     branches: [main]
     paths-ignore:
-      - "dist/**"
       - "**.md"
       - ".DS_Store"
   workflow_dispatch:
@@ -85,23 +83,3 @@ jobs:
           files: |
             dist/anti-debugger-bypass-${{ steps.version.outputs.version_name }}.crx
             dist/anti-debugger-bypass-${{ steps.version.outputs.version_name }}.zip
-
-      - name: Commit refreshed dist/ artifacts back to main
-        if: steps.check.outputs.exists == 'false'
-        env:
-          VERSION_NAME: ${{ steps.version.outputs.version_name }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # Drop artifacts from older versions so dist/ only holds the current one
-          find dist -type f -name 'anti-debugger-bypass*' \
-            ! -name "anti-debugger-bypass-${VERSION_NAME}.crx" \
-            ! -name "anti-debugger-bypass-${VERSION_NAME}.zip" \
-            -delete
-          git add dist/
-          if git diff --cached --quiet; then
-            echo "dist/ unchanged - nothing to commit"
-            exit 0
-          fi
-          git commit -m "chore: update dist/ artifacts for v$VERSION_NAME [skip ci]"
-          git push

@@ -36,7 +36,7 @@ Since this extension is not currently on the Chrome Web Store, you can install i
 
 ### Option 1: Download the prebuilt `.crx` (easiest)
 
-1. Download `anti-debugger-bypass-<version_name>.crx` (e.g. `anti-debugger-bypass-1.1-rc1.crx`) from the latest [Release](../../releases/latest) (built automatically by CI), or the committed copy in the [`dist/`](dist) folder.
+1. Download `anti-debugger-bypass-<version_name>.crx` (e.g. `anti-debugger-bypass-1.1-rc1.crx`) and the matching `.zip` from the latest [Release](../../releases/latest) — they are built and attached automatically by CI on every version change.
 2. Open Google Chrome and navigate to `chrome://extensions/`.
 3. Enable **Developer mode** using the toggle switch in the top right corner.
 4. Drag and drop the downloaded `.crx` file onto the page.

@@ -4,5 +4,8 @@
 # Build staging directory
 build/
 
+# Build output - artifacts are distributed via GitHub Releases, not the repo
+dist/
+
 # Private signing key for the .crx - NEVER commit this
 *.pem
