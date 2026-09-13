@@ -1,8 +1,10 @@
 name: Release
 
-# When a push to main bumps "version" in manifest.json, build the .crx/.zip,
-# create a GitHub release tagged v<version> with the artifacts attached,
-# and commit the refreshed dist/ artifacts back to the branch.
+# When a push to main changes the version in manifest.json, build the
+# .crx/.zip, create a GitHub release tagged v<version_name> with the
+# artifacts attached, and commit the refreshed dist/ artifacts back to
+# the branch. The release tag and file names use "version_name"
+# (free-form, e.g. "1.1-rc1"), falling back to "version" when not set.
 
 on:
   push:
@@ -29,31 +31,36 @@ jobs:
       - name: Read version from manifest.json
         id: version
         run: |
-          VERSION=$(jq -r .version manifest.json)
-          if [ -z "$VERSION" ] || [ "$VERSION" = "null" ]; then
-            echo "::error::Could not read version from manifest.json"
+          VERSION_NAME=$(jq -r '.version_name // .version // empty' manifest.json)
+          if [ -z "$VERSION_NAME" ] || [ "$VERSION_NAME" = "null" ]; then
+            echo "::error::Could not read version_name/version from manifest.json"
             exit 1
           fi
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          if printf '%s' "$VERSION_NAME" | grep -Eq '[[:space:]]|[/\\:~^?*\[\]]'; then
+            echo "::error::version_name '$VERSION_NAME' contains characters not allowed in file names or git tags"
+            exit 1
+          fi
+          echo "version_name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
 
       - name: Check if this version was already released
         id: check
         env:
           GH_TOKEN: ${{ github.token }}
-          VERSION: ${{ steps.version.outputs.version }}
+          VERSION_NAME: ${{ steps.version.outputs.version_name }}
         run: |
-          if gh release view "v$VERSION" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+          if gh release view "v$VERSION_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
-            echo "Release v$VERSION already exists - nothing to do."
+            echo "Release v$VERSION_NAME already exists - nothing to do."
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
-            echo "New version $VERSION detected - building release."
+            echo "New version $VERSION_NAME detected - building release."
           fi
 
       - name: Build .crx and .zip
         if: steps.check.outputs.exists == 'false'
         env:
           CRX_PRIVATE_KEY: ${{ secrets.CRX_PRIVATE_KEY }}
+          VERSION_NAME: ${{ steps.version.outputs.version_name }}
         run: |
           if [ -z "$CRX_PRIVATE_KEY" ]; then
             echo "::error::Missing repository secret CRX_PRIVATE_KEY. Run 'base64 -i extension.pem | pbcopy' locally, then add it under Settings > Secrets and variables > Actions > New repository secret."
@@ -63,8 +70,8 @@ jobs:
           make stage
           npx --yes crx3 \
             -p extension.pem \
-            -o dist/anti-debugger-bypass.crx \
-            -z dist/anti-debugger-bypass.zip \
+            -o "dist/anti-debugger-bypass-${VERSION_NAME}.crx" \
+            -z "dist/anti-debugger-bypass-${VERSION_NAME}.zip" \
             build/anti-debugger-bypass
           rm -f extension.pem
 
@@ -72,24 +79,29 @@ jobs:
         if: steps.check.outputs.exists == 'false'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.version.outputs.version }}
-          name: v${{ steps.version.outputs.version }}
+          tag_name: v${{ steps.version.outputs.version_name }}
+          name: v${{ steps.version.outputs.version_name }}
           generate_release_notes: true
           files: |
-            dist/anti-debugger-bypass.crx
-            dist/anti-debugger-bypass.zip
+            dist/anti-debugger-bypass-${{ steps.version.outputs.version_name }}.crx
+            dist/anti-debugger-bypass-${{ steps.version.outputs.version_name }}.zip
 
       - name: Commit refreshed dist/ artifacts back to main
         if: steps.check.outputs.exists == 'false'
         env:
-          VERSION: ${{ steps.version.outputs.version }}
+          VERSION_NAME: ${{ steps.version.outputs.version_name }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Drop artifacts from older versions so dist/ only holds the current one
+          find dist -type f -name 'anti-debugger-bypass*' \
+            ! -name "anti-debugger-bypass-${VERSION_NAME}.crx" \
+            ! -name "anti-debugger-bypass-${VERSION_NAME}.zip" \
+            -delete
           git add dist/
           if git diff --cached --quiet; then
             echo "dist/ unchanged - nothing to commit"
             exit 0
           fi
-          git commit -m "chore: update dist/ artifacts for v$VERSION [skip ci]"
+          git commit -m "chore: update dist/ artifacts for v$VERSION_NAME [skip ci]"
           git push

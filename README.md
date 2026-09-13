@@ -36,13 +36,13 @@ Since this extension is not currently on the Chrome Web Store, you can install i
 
 ### Option 1: Download the prebuilt `.crx` (easiest)
 
-1. Download [`anti-debugger-bypass.crx`](releases/latest) from the latest [Release](../../releases/latest) (built automatically by CI), or the committed copy in [`dist/anti-debugger-bypass.crx`](dist/anti-debugger-bypass.crx).
+1. Download `anti-debugger-bypass-<version_name>.crx` (e.g. `anti-debugger-bypass-1.1-rc1.crx`) from the latest [Release](../../releases/latest) (built automatically by CI), or the committed copy in the [`dist/`](dist) folder.
 2. Open Google Chrome and navigate to `chrome://extensions/`.
 3. Enable **Developer mode** using the toggle switch in the top right corner.
 4. Drag and drop the downloaded `.crx` file onto the page.
 5. The extension is now installed and active! 🎉
 
-> **Note:** Chrome sometimes blocks extensions installed outside the Web Store. If the drag & drop is rejected, download [`dist/anti-debugger-bypass.zip`](dist/anti-debugger-bypass.zip), unzip it, and follow Option 2 below with the unzipped folder.
+> **Note:** Chrome sometimes blocks extensions installed outside the Web Store. If the drag & drop is rejected, download the matching `.zip` from the same place, unzip it, and follow Option 2 below with the unzipped folder.
 
 ### Option 2: Load unpacked
 
@@ -59,8 +59,8 @@ Since this extension is not currently on the Chrome Web Store, you can install i
 ### Building the `.crx` yourself
 
 ```bash
-make        # builds dist/anti-debugger-bypass.crx (signed, requires Chrome)
-make zip    # builds dist/anti-debugger-bypass.zip
+make        # builds dist/anti-debugger-bypass-<version_name>.crx (signed, requires Chrome)
+make zip    # builds dist/anti-debugger-bypass-<version_name>.zip
 make clean  # removes build artifacts
 ```
 
@@ -68,7 +68,7 @@ On the first run a private signing key (`extension.pem`) is generated automatica
 
 ### Automated releases (CI)
 
-A GitHub Actions workflow (`.github/workflows/release.yml`) builds and attaches the `.crx`/`.zip` to a new GitHub release whenever the `version` in `manifest.json` is bumped and pushed to `main`. It requires the base64-encoded signing key to be stored as the repository secret `CRX_PRIVATE_KEY`:
+A GitHub Actions workflow (`.github/workflows/release.yml`) builds and attaches the `.crx`/`.zip` to a new GitHub release whenever the version in `manifest.json` changes and is pushed to `main`. Releases and files are named after `version_name` (free-form, e.g. `v1.1-rc1`), falling back to `version` when `version_name` is not set. It requires the base64-encoded signing key to be stored as the repository secret `CRX_PRIVATE_KEY`:
 
 ```bash
 base64 -i extension.pem | pbcopy   # then paste into Settings > Secrets and variables > Actions
