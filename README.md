@@ -29,6 +29,7 @@ Whether you're a security researcher, a penetration tester, or just trying to in
 - 🔗 **Redirect Prevention**: Prevents aggressive anti-debug scripts from redirecting `location.href` away from the current page.
 - 📴 **Console Tamper Protection**: Temporarily disables console output clearing (`console.clear`) and timing checks during page load, restoring them automatically afterward.
 - 🔐 **CSP Enforcement**: Uses a Content-Security-Policy meta tag to help neutralize inline `eval` payloads.
+- 🖱️ **One-Click Toggle**: Turn the extension on or off by clicking the toolbar icon — a green **ON** / grey **OFF** badge shows the current state (persisted across sessions, on by default).
 
 ## 🚀 Installation
 
@@ -76,12 +77,13 @@ base64 -i extension.pem | pbcopy   # then paste into Settings > Secrets and vari
 
 ## 💻 Usage
 
-Once installed and enabled, the extension runs automatically on all web pages (`<all_urls>`). 
+Once installed, the extension is **enabled by default** and runs automatically on all web pages (`<all_urls>`).
 
-1. Simply open Chrome Developer Tools (`F12` or `Ctrl+Shift+I` / `Cmd+Option+I`).
-2. Navigate to a site with anti-debugging protections.
-3. The extension seamlessly patches global functions in the `MAIN` execution world before scripts load.
-4. Check your console. You should see the message: `[bypass] DevTools protection disabled. Console restored.` after the page is fully loaded.
+1. Check the toolbar icon badge: **ON** means active, **OFF** means disabled — click the icon to toggle.
+2. Simply open Chrome Developer Tools (`F12` or `Ctrl+Shift+I` / `Cmd+Option+I`).
+3. Navigate to a site with anti-debugging protections.
+4. The extension seamlessly patches global functions in the `MAIN` execution world before scripts load.
+5. Check your console. You should see the message: `[Anti-Debugger Bypass] DevTools protection disabled. Console restored.` after the page is fully loaded.
 
 ## ⚠️ Disclaimer
 
