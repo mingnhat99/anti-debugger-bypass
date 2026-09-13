@@ -25,15 +25,18 @@ STAGE_DIR := build/$(NAME)
 FILES := manifest.json background.js inject.js \
          icon-16.png icon-32.png icon-48.png icon-128.png
 
-.PHONY: all crx zip clean
+.PHONY: all stage crx zip clean
 
 all: crx
 
-crx:
-	@test -n "$(CHROME)" || { echo "error: Chrome/Chromium not found (run: make CHROME=/path/to/chrome)"; exit 1; }
-	@echo ">> Packing with $(CHROME)"
+# Stage extension files into build/anti-debugger-bypass (also used by CI)
+stage:
 	rm -rf build && mkdir -p $(STAGE_DIR) dist
 	cp $(FILES) $(STAGE_DIR)/
+
+crx: stage
+	@test -n "$(CHROME)" || { echo "error: Chrome/Chromium not found (run: make CHROME=/path/to/chrome)"; exit 1; }
+	@echo ">> Packing with $(CHROME)"
 	if [ -f "$(KEY)" ]; then \
 		"$(CHROME)" --pack-extension="$(CURDIR)/$(STAGE_DIR)" --pack-extension-key="$(CURDIR)/$(KEY)" \
 			|| { echo "error: packing failed"; exit 1; }; \
@@ -49,9 +52,7 @@ crx:
 		| tr '0123456789abcdef' 'abcdefghijklmnop'); \
 	echo ">> Built dist/$(NAME).crx (extension ID: $$id)"
 
-zip:
-	rm -rf build && mkdir -p $(STAGE_DIR) dist
-	cp $(FILES) $(STAGE_DIR)/
+zip: stage
 	cd build && zip -qr "$(CURDIR)/dist/$(NAME).zip" $(NAME)
 	@echo ">> Built dist/$(NAME).zip"
 

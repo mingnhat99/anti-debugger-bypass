@@ -36,7 +36,7 @@ Since this extension is not currently on the Chrome Web Store, you can install i
 
 ### Option 1: Download the prebuilt `.crx` (easiest)
 
-1. Download [`dist/anti-debugger-bypass.crx`](dist/anti-debugger-bypass.crx) from this repository.
+1. Download [`anti-debugger-bypass.crx`](releases/latest) from the latest [Release](../../releases/latest) (built automatically by CI), or the committed copy in [`dist/anti-debugger-bypass.crx`](dist/anti-debugger-bypass.crx).
 2. Open Google Chrome and navigate to `chrome://extensions/`.
 3. Enable **Developer mode** using the toggle switch in the top right corner.
 4. Drag and drop the downloaded `.crx` file onto the page.
@@ -65,6 +65,14 @@ make clean  # removes build artifacts
 ```
 
 On the first run a private signing key (`extension.pem`) is generated automatically and reused afterwards, so the extension ID stays the same across builds. Keep this key private — it is git-ignored and must never be committed or lost.
+
+### Automated releases (CI)
+
+A GitHub Actions workflow (`.github/workflows/release.yml`) builds and attaches the `.crx`/`.zip` to a new GitHub release whenever the `version` in `manifest.json` is bumped and pushed to `main`. It requires the base64-encoded signing key to be stored as the repository secret `CRX_PRIVATE_KEY`:
+
+```bash
+base64 -i extension.pem | pbcopy   # then paste into Settings > Secrets and variables > Actions
+```
 
 ## 💻 Usage
 

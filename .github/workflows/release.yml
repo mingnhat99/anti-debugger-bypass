@@ -1,0 +1,95 @@
+name: Release
+
+# When a push to main bumps "version" in manifest.json, build the .crx/.zip,
+# create a GitHub release tagged v<version> with the artifacts attached,
+# and commit the refreshed dist/ artifacts back to the branch.
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "dist/**"
+      - "**.md"
+      - ".DS_Store"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Read version from manifest.json
+        id: version
+        run: |
+          VERSION=$(jq -r .version manifest.json)
+          if [ -z "$VERSION" ] || [ "$VERSION" = "null" ]; then
+            echo "::error::Could not read version from manifest.json"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Check if this version was already released
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          if gh release view "v$VERSION" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Release v$VERSION already exists - nothing to do."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "New version $VERSION detected - building release."
+          fi
+
+      - name: Build .crx and .zip
+        if: steps.check.outputs.exists == 'false'
+        env:
+          CRX_PRIVATE_KEY: ${{ secrets.CRX_PRIVATE_KEY }}
+        run: |
+          if [ -z "$CRX_PRIVATE_KEY" ]; then
+            echo "::error::Missing repository secret CRX_PRIVATE_KEY. Run 'base64 -i extension.pem | pbcopy' locally, then add it under Settings > Secrets and variables > Actions > New repository secret."
+            exit 1
+          fi
+          printf '%s' "$CRX_PRIVATE_KEY" | base64 --decode > extension.pem
+          make stage
+          npx --yes crx3 \
+            -p extension.pem \
+            -o dist/anti-debugger-bypass.crx \
+            -z dist/anti-debugger-bypass.zip \
+            build/anti-debugger-bypass
+          rm -f extension.pem
+
+      - name: Create release and attach artifacts
+        if: steps.check.outputs.exists == 'false'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: v${{ steps.version.outputs.version }}
+          generate_release_notes: true
+          files: |
+            dist/anti-debugger-bypass.crx
+            dist/anti-debugger-bypass.zip
+
+      - name: Commit refreshed dist/ artifacts back to main
+        if: steps.check.outputs.exists == 'false'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dist/
+          if git diff --cached --quiet; then
+            echo "dist/ unchanged - nothing to commit"
+            exit 0
+          fi
+          git commit -m "chore: update dist/ artifacts for v$VERSION [skip ci]"
+          git push
